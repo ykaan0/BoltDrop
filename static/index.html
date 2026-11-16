@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BoltDrop - Yüksek Hızlı LAN Veri Aktarımı</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="logo-group">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">
+          <h1>BoltDrop</h1>
+          <p>Gigabit Hızlı Yerel Ağ Veri Aktarım Platformu</p>
+        </div>
+      </div>
+      <div class="device-badge">
+        <div class="status-dot"></div>
+        <span id="myDeviceName">Bağlanıyor...</span>
+        <span style="color: var(--text-muted); font-size: 11px;" id="myDeviceIp"></span>
+      </div>
+    </header>
+
+    <!-- Canlı Transfer Monitörü (Aktifken açılır) -->
+    <div class="transfer-section" id="transferSection">
+      <div class="transfer-monitor">
+        <div class="monitor-header">
+          <div>
+            <h3 id="transferFileName" style="font-size: 18px; font-weight: 700;">Dosya Aktarılıyor...</h3>
+            <p id="transferPeer" style="font-size: 12px; color: var(--text-muted);">Hedef: Bilgisayar</p>
+          </div>
+          <span class="badge-count" id="transferStatusBadge">AKTİF</span>
+        </div>
+
+        <div class="monitor-stats">
+          <div class="stat-box">
+            <div class="stat-label">Anlık Hız</div>
+            <div class="stat-value highlight" id="transferSpeed">0.0 MB/s</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Aktarılan / Toplam</div>
+            <div class="stat-value" id="transferSize">0 MB / 0 MB</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Tahmini Kalan Süre</div>
+            <div class="stat-value" id="transferEta">Hesaplanıyor...</div>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-info">
+          <span id="progressPercent">0%</span>
+          <span id="transferChunks">Parça: 0 / 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ana Panel -->
+    <div class="dashboard-grid">
+      <!-- 1. Dosya Seçme / Sürükleme -->
+      <div class="card">
+        <div class="card-title">
+          <span>📁 Dosya Gönder</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Boyut Sınırı Yok (90+ GB)</span>
+        </div>
+
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📥</div>
+          <div class="dropzone-title">Dosyayı Buraya Sürükle & Bırak</div>
+          <div class="dropzone-desc">veya bilgisayarından seçmek için tıkla</div>
+          <input type="file" id="fileInput" class="file-input" multiple>
+        </div>
+
+        <div class="selected-file-info" id="selectedFileInfo">
+          <div class="file-meta">
+            <div style="font-size: 24px;">📄</div>
+            <div>
+              <div class="file-name" id="selectedFileName">dosya.iso</div>
+              <div class="file-size" id="selectedFileSize">0 GB</div>
+            </div>
+          </div>
+          <button class="btn" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;" id="btnCancelFile">✕</button>
+        </div>
+      </div>
+
+      <!-- 2. Ağdaki Cihazlar (Auto-Discovery) -->
+      <div class="card">
+        <div class="card-title">
+          <span>📡 Ağdaki Cihazlar</span>
+          <span class="badge-count" id="peerCount">0 Cihaz</span>
+        </div>
+
+        <div class="peers-list" id="peersList">
+          <div class="empty-peers">
+            <div style="font-size: 32px; opacity: 0.6;">🔍</div>
+            <p style="font-weight: 500;">Ağ taranıyor...</p>
+            <p style="font-size: 12px;">Arkadaşın aynı Wi-Fi/ağda BoltDrop'u açtığında burada anında görünecektir.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- İndirilen Dosyalar -->
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-title">
+        <span>💾 İndirilen & Alınan Dosyalar</span>
+        <button class="btn" style="padding: 4px 10px; font-size: 11px;" id="btnRefreshFiles">Yenile</button>
+      </div>
+
+      <div class="files-list" id="filesList">
+        <p style="text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px;">Henüz alınan dosya yok.
+        </p>
+      </div>
+    </div>
+
+    <!-- Bilgilendirme Kartı -->
+    <div class="card" style="background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2);">
+      <div style="display: flex; gap: 14px; align-items: flex-start;">
+        <div style="font-size: 26px;">💡</div>
+        <div style="font-size: 13px; line-height: 1.6; color: #cbd5e1;">
+          <strong style="color: #fff;">Neden Bu Kadar Hızlı?</strong><br>
+          BoltDrop, verilerinizi asla internete veya bulut sunucularına göndermez. Yerel ağınızdaki (LAN) doğrudan kablo
+          veya Wi-Fi köprüsü üzerinden, işletim sistemi çekirdeğinin doğrudan diskten-ağa (zero-copy streaming) aktarım
+          yeteneğiyle gönderir. 1 Gbps bağlantıda 90 GB yaklaşık <strong>12-14 dakika</strong> sürer.
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      BoltDrop • Yerel Ağ P2P Veri Aktarımı
+    </footer>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+
+</html>

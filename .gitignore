@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+downloads/*
+!downloads/.gitkeep
+.DS_Store
+*.log
